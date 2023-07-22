@@ -10,10 +10,12 @@ from keepalive import keep_alive
 bot = telebot.TeleBot(os.getenv('tg_key'))
 
 keep_alive()
+
 # Create thread-local storage for SQLite connection
 local_storage = threading.local()
 
 
+#Function gets database sqlite3 connection
 def get_db_connection():
     # Check if a connection exists for the current thread, if not, create a new one
     if not hasattr(local_storage, 'db'):
