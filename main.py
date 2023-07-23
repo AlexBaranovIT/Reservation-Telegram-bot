@@ -23,6 +23,7 @@ def get_db_connection():
         create_reservations_table()  # Ensure the table is created
     return local_storage.db
 
+
 def create_reservations_table():
     db_connection = get_db_connection()
     cursor = db_connection.cursor()
@@ -33,6 +34,7 @@ def create_reservations_table():
         );
     ''')
     db_connection.commit()
+
 
 def save_reservation_to_db(user_id, reservation_time):
     cursor = get_db_connection().cursor()
