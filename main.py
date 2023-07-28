@@ -6,7 +6,7 @@ import threading
 import os
 from keepalive import keep_alive
 
-# Replace 'YOUR_TELEGRAM_BOT_TOKEN' with the token you obtained from BotFather
+# Replace 'tg_key' with the token you obtained from BotFather
 bot = telebot.TeleBot(os.getenv('tg_key'))
 
 keep_alive()
@@ -15,7 +15,6 @@ keep_alive()
 local_storage = threading.local()
 
 
-#Function gets database sqlite3 connection
 def get_db_connection():
     # Check if a connection exists for the current thread, if not, create a new one
     if not hasattr(local_storage, 'db'):
@@ -90,9 +89,18 @@ def send_confirmation(chat_id, reservation_datetime):
 
 def save_reservations_to_file(file_path):
     reservations = get_all_reservations()
+
     with open(file_path, 'w') as file:
         for res in reservations:
-            file.write(f"User ID: {res[0]}, Reservation Time: {res[1]}\n")
+            user_id = res[0]
+            reservation_time = res[1]
+
+            # Get the user's first name and last name using the Telegram API
+            user_info = get_user_info(user_id)
+            first_name = user_info['first_name']
+            last_name = user_info.get('last_name', '')
+
+            file.write(f"User ID: {user_id}, Name: {first_name} {last_name}, Reservation Time: {reservation_time}\n")
 
 
 def get_all_reservations():
@@ -100,6 +108,19 @@ def get_all_reservations():
     cursor = db_connection.cursor()
     cursor.execute("SELECT user_id, reservation_time FROM reservations")
     return cursor.fetchall()
+
+
+def get_user_info(user_id):
+    try:
+        user = bot.get_chat(user_id)
+        return {
+            'id': user.id,
+            'first_name': user.first_name,
+            'last_name': user.last_name
+        }
+    except Exception as e:
+        print(f"Failed to get user information for user_id {user_id}: {e}")
+        return {}
 
 
 @bot.message_handler(commands=['start'])
@@ -130,7 +151,7 @@ def ask_for_date(message):
         markup = generate_date_selection_buttons()
         bot.send_message(chat_id, "Please select the date you want to play:", reply_markup=markup)
 
-  
+
 @bot.callback_query_handler(func=lambda call: True)
 def process_date_selection(call):
     chat_id = call.message.chat.id
@@ -207,3 +228,4 @@ def process_time_input(message):
 
 # Polling loop to keep the bot running with none_stop=True
 bot.polling(none_stop=True)
+
