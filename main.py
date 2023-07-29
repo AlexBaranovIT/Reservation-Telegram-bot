@@ -228,4 +228,3 @@ def process_time_input(message):
 
 # Polling loop to keep the bot running with none_stop=True
 bot.polling(none_stop=True)
-
