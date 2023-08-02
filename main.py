@@ -17,6 +17,7 @@ keep_alive()
 # Create thread-local storage for SQLite connection
 local_storage = threading.local()
 
+#Time slots for every user
 available_time_slots = {}
 
 
