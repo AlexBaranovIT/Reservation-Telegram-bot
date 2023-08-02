@@ -5,15 +5,19 @@ import sqlite3
 import threading
 import os
 from keepalive import keep_alive
+import pytz  # Import the pytz library
 
-# Replace 'tg_key' with the token you obtained from BotFather
+# Replace 'YOUR_TELEGRAM_BOT_TOKEN' with the token you obtained from BotFather
 bot = telebot.TeleBot(os.getenv('tg_key'))
 
-keep_alive()
+# Set the timezone to Limassol, Cyprus (GMT+3)
+tz = pytz.timezone('Asia/Nicosia')
 
+keep_alive()
 # Create thread-local storage for SQLite connection
 local_storage = threading.local()
 
+available_time_slots = {}
 
 def get_db_connection():
     # Check if a connection exists for the current thread, if not, create a new one
@@ -21,6 +25,7 @@ def get_db_connection():
         local_storage.db = sqlite3.connect('tennis_court_reservations.db')
         create_reservations_table()  # Ensure the table is created
     return local_storage.db
+
 
 
 def create_reservations_table():
@@ -65,26 +70,48 @@ def generate_date_selection_buttons():
 
 
 def generate_available_time_slots(date):
+    # Set the timezone for Cyprus
+    tz = pytz.timezone('Europe/Nicosia')
+
+    # Convert the provided date to a timezone-aware datetime object at the start of the day
+    aware_date_start = tz.localize(datetime.datetime.combine(date, datetime.time()))
+
+    # Get the already reserved slots for the date
+    reserved_slots = get_reserved_time_slots(date)
+
     # Generate list of available time slots for the selected date
     available_slots = [
-        datetime.datetime.combine(date, datetime.time(hour=h))
-        for h in range(8, 22)
+        aware_date_start + datetime.timedelta(hours=h)
+        for h in range(6, 22) # 6 AM to 10 PM
+        if (aware_date_start + datetime.timedelta(hours=h)).strftime('%H:%M') not in reserved_slots
     ]
-
-    cursor = get_db_connection().cursor()
-    cursor.execute("SELECT reservation_time FROM reservations WHERE reservation_time LIKE ?", ("%{}%".format(date),))
-    reserved_times = [datetime.datetime.strptime(res[0], '%Y-%m-%d %H:%M') for res in cursor.fetchall()]
-
-    # Filter out already reserved slots
-    available_slots = [slot for slot in available_slots if slot not in reserved_times]
 
     return available_slots
 
+def get_reserved_time_slots(date):
+    cursor = get_db_connection().cursor()
+    cursor.execute("SELECT reservation_time FROM reservations WHERE strftime('%Y-%m-%d', reservation_time) = ?", (date.strftime('%Y-%m-%d'),))
+    reserved_times = cursor.fetchall()
+    reserved_slots = [datetime.datetime.strptime(time[0], '%Y-%m-%d %H:%M').strftime('%H:%M') for time in reserved_times]
+    return reserved_slots
 
-def send_confirmation(chat_id, reservation_datetime):
-    # Send confirmation message to the user
-    bot.send_message(chat_id, "You have successfully reserved the tennis court on {}.".format(reservation_datetime.strftime('%Y-%m-%d %H:%M')))
+
+def send_confirmation(chat_id, reservation_datetime, message):
+    # Customize the message as required
+    confirmation_message = "You have successfully reserved the tennis court on {}.".format(reservation_datetime.strftime('%Y-%m-%d %H:%M'))
+    bot.send_message(chat_id, confirmation_message)
     save_reservations_to_file('reservations.txt')  # Save reservations to the file
+
+    start_markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
+    start_button = types.KeyboardButton('/start')
+    reserve_button = types.KeyboardButton('/reserve')
+    cancel_button = types.KeyboardButton('/cancel')
+    support_button = types.KeyboardButton('/support')
+    location_button = types.KeyboardButton('/location')
+
+    start_markup.add(start_button, reserve_button, cancel_button, support_button, location_button)
+
+    bot.send_message(message.chat.id, "Choose the function:", reply_markup=start_markup)
 
 
 def save_reservations_to_file(file_path):
@@ -125,13 +152,53 @@ def get_user_info(user_id):
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-    start_markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
+    start_markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
     start_button = types.KeyboardButton('/start')
     reserve_button = types.KeyboardButton('/reserve')
     cancel_button = types.KeyboardButton('/cancel')
+    support_button = types.KeyboardButton('/support')
+    location_button = types.KeyboardButton('/location')
 
-    start_markup.add(start_button, reserve_button, cancel_button)
-    bot.send_message(message.chat.id, "Welcome to the Tennis Court Reservation Bot!\nUse /start to start again.\nUse /reserve to book a court for 1 hour.\nUse /cancel to cancel your reservation.")
+    start_markup.add(start_button, reserve_button, cancel_button, support_button, location_button)
+    bot.send_message(message.chat.id, "Welcome to the Tennis Court Reservation Bot!\n\nUse /start to start again.\n\nUse /reserve to book a court for 1 hour.\n\nUse /cancel to cancel your reservation.\n\nUse /support to text the support team.\n\nUse /location to get the court location.")
+    bot.send_message(message.chat.id, "Choose the function:", reply_markup=start_markup)
+
+
+@bot.message_handler(commands=['support'])
+def on_start_command(message):
+    # Send a message with the inline keyboard
+    markup = types.InlineKeyboardMarkup()
+    btn = types.InlineKeyboardButton("Text support", url='https://t.me/ImAlex007')
+    markup.add(btn)
+
+    bot.send_message(message.chat.id, "Press the button to text the support team.", reply_markup=markup)
+    start_markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
+    start_button = types.KeyboardButton('/start')
+    reserve_button = types.KeyboardButton('/reserve')
+    cancel_button = types.KeyboardButton('/cancel')
+    support_button = types.KeyboardButton('/support')
+    location_button = types.KeyboardButton('/location')
+
+    start_markup.add(start_button, reserve_button, cancel_button, support_button, location_button)
+    bot.send_message(message.chat.id, "Choose the function:", reply_markup=start_markup)
+
+
+@bot.message_handler(commands=['location'])
+def send_location(message):
+    # Replace these coordinates with the latitude and longitude of the location you want to send
+    latitude = 34.70197266790477
+    longitude = 33.07582804045963
+
+    bot.send_location(message.chat.id, latitude, longitude)
+    bot.send_message(message.chat.id, 'Court is near Sklavenitis Columbia Parking, behind Sklavenitis Columbia, Germasogeia Limassol')
+    start_markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
+    start_button = types.KeyboardButton('/start')
+    reserve_button = types.KeyboardButton('/reserve')
+    cancel_button = types.KeyboardButton('/cancel')
+    support_button = types.KeyboardButton('/support')
+    location_button = types.KeyboardButton('/location')
+
+    start_markup.add(start_button, reserve_button, cancel_button, support_button, location_button)
     bot.send_message(message.chat.id, "Choose the function:", reply_markup=start_markup)
 
 
@@ -144,13 +211,43 @@ def ask_for_date(message):
     cursor.execute("SELECT reservation_time FROM reservations WHERE user_id=?", (user_id,))
     reservation_time = cursor.fetchone()
 
-    if reservation_time:
-        bot.send_message(chat_id, "You already have a reservation on {}.".format(reservation_time[0]))
-    else:
-        # Generate inline buttons for date selection
-        markup = generate_date_selection_buttons()
-        bot.send_message(chat_id, "Please select the date you want to play:", reply_markup=markup)
+    if reservation_time:  # Check if reservation_time is not None
+        reservation_time_naive = datetime.datetime.strptime(reservation_time[0], '%Y-%m-%d %H:%M')
+        reservation_time_aware = tz.localize(reservation_time_naive)
 
+        if reservation_time_aware > datetime.datetime.now(tz):
+            bot.send_message(chat_id, "You already have a reservation on {}.".format(reservation_time[0]))
+            return
+
+    # Generate buttons for date selection
+    markup = generate_date_selection_buttons()
+    bot.send_message(chat_id, "Please select the date you want to play:", reply_markup=markup)
+
+
+@bot.message_handler(commands=['cancel'])
+def cancel(message):
+    chat_id = message.chat.id
+    user_id = message.from_user.id
+
+    cursor = get_db_connection().cursor()
+    cursor.execute("SELECT reservation_time FROM reservations WHERE user_id=?", (user_id,))
+    reservation_time = cursor.fetchone()
+
+    if reservation_time:
+        # Extract the reservation date
+        reservation_date = datetime.datetime.strptime(reservation_time[0], '%Y-%m-%d %H:%M').date()
+
+        # Delete the reservation
+        delete_reservation_from_db(user_id)
+
+        # Regenerate available time slots for the reservation date
+        generate_available_time_slots(reservation_date)
+
+        bot.send_message(chat_id, "Your reservation has been canceled.")
+        save_reservations_to_file('reservations.txt')  # Save reservations to the file
+    else:
+        bot.send_message(chat_id, "You don't have any reservation to cancel.")
+      
 
 @bot.callback_query_handler(func=lambda call: True)
 def process_date_selection(call):
@@ -172,58 +269,76 @@ def process_date_selection(call):
         if not available_slots:
             bot.send_message(chat_id, "Sorry, no available time slots for {}.".format(reservation_date.strftime('%Y-%m-%d')))
         else:
-            available_time_slots = "\n".join(slot.strftime('%H:%M') for slot in available_slots)
-            bot.send_message(chat_id, "Available time slots for {}:\n{}".format(reservation_date.strftime('%Y-%m-%d'), available_time_slots))
-            bot.send_message(chat_id, "Type the time you want to play. For example: 09:00")
+            # Save the available time slots to the dictionary for the user
+            available_time_slots[user_id] = {'date': reservation_date, 'slots': available_slots}
+
+            # Generate buttons for time selection
+            markup = generate_time_selection_buttons(available_slots)
+            bot.send_message(chat_id, "Available time slots for {}:".format(reservation_date.strftime('%Y-%m-%d')), reply_markup=markup)
+
     else:
         bot.send_message(chat_id, "Sorry, you can only reserve a time within the next 7 days.")
 
 
-@bot.message_handler(commands=['cancel'])
-def cancel(message):
+def generate_time_selection_buttons(available_slots):
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=3)
+    current_datetime = datetime.datetime.now(tz)
+
+    # Generate buttons for each available time slot within the specified range (6 AM to 10 PM)
+    for slot in available_slots:
+        # Check if the slot is within the range and is not in the past or within the next 5 minutes (buffer time)
+        if 6 <= slot.hour < 22 and slot >= current_datetime + datetime.timedelta(minutes=5):
+            button = types.KeyboardButton(slot.strftime('%H:%M'))
+            markup.add(button)
+
+    return markup
+
+
+@bot.message_handler(func=lambda message: message.text and message.text in [slot.strftime('%H:%M') for slot in available_time_slots.get(message.from_user.id, {}).get('slots', [])])
+def process_time_selection(message):
     chat_id = message.chat.id
     user_id = message.from_user.id
+    selected_time = message.text.strip()
 
-    cursor = get_db_connection().cursor()
-    cursor.execute("SELECT reservation_time FROM reservations WHERE user_id=?", (user_id,))
-    reservation_time = cursor.fetchone()
+    # Get the selected date
+    selected_date = available_time_slots[user_id]['date']
 
-    if reservation_time:
-        delete_reservation_from_db(user_id)
-        bot.send_message(chat_id, "Your reservation has been canceled.")
-        save_reservations_to_file('reservations.txt')  # Save reservations to the file
+    # Parse the selected time input
+    selected_time_obj = datetime.datetime.strptime(selected_time, '%H:%M').time()
+
+    # Combine the selected date and reservation time to create the reservation datetime
+    reservation_datetime = datetime.datetime.combine(selected_date, selected_time_obj)
+
+    # Add timezone information to the reservation datetime
+    reservation_datetime = tz.localize(reservation_datetime)
+
+    # Check if the reservation time is in the past
+    if reservation_datetime < datetime.datetime.now(tz):
+        bot.send_message(chat_id, "You cannot reserve a time in the past.")
     else:
-        bot.send_message(chat_id, "You don't have any reservation to cancel.")
+        # Save the reservation to the database
+        save_reservation_to_db(user_id, reservation_datetime.strftime('%Y-%m-%d %H:%M'))
 
+        # Send confirmation message to the user
+        send_confirmation(chat_id, reservation_datetime, message)  # You can use the existing function to send a confirmation message
 
-@bot.message_handler(func=lambda message: message.text and ':' in message.text and '/reserve' not in message.text and '/cancel' not in message.text)
-def process_time_input(message):
-    chat_id = message.chat.id
-    user_id = message.from_user.id
-    time_input = message.text.strip()
+    # Remove the selected time from available slots for the user
+    available_time_slots[user_id]['slots'] = [slot for slot in available_time_slots[user_id]['slots'] if slot.strftime('%H:%M') != selected_time]
+    available_time_slots[user_id]['slots'] = [slot for slot in available_time_slots[user_id]['slots'] if slot.astimezone(tz) > datetime.datetime.now(tz)]  # Remove past slots
 
-    try:
-        reservation_time = datetime.datetime.strptime(time_input, '%H:%M').time()
-
-        # Check if the reservation time is within the valid range (8 AM to 9 PM)
-        if datetime.time(8, 0) <= reservation_time <= datetime.time(21, 0):
-            # Get the current date
-            current_date = datetime.datetime.now().date()
-
-            # Combine the current date and reservation time to create the reservation datetime
-            reservation_datetime = datetime.datetime.combine(current_date, reservation_time)
-
-            # Save the reservation to the database
-            save_reservation_to_db(user_id, reservation_datetime.strftime('%Y-%m-%d %H:%M'))
-
-            # Send confirmation message to the user
-            bot.send_message(chat_id, "You have successfully reserved the tennis court on {}.".format(reservation_datetime.strftime('%Y-%m-%d %H:%M')))
-            save_reservations_to_file('reservations.txt')  # Save reservations to the file
-        else:
-            bot.send_message(chat_id, "Invalid reservation time. Please enter a time between 8 AM and 9 PM (e.g., 09:00).")
-
-    except ValueError:
-        bot.send_message(chat_id, "Invalid time format. Please enter the time in HH:MM format (e.g., 09:00).")
+@bot.callback_query_handler(func=lambda call: True)
+def callback_handler(call):
+    selected_time = call.data  # Assuming that the callback data is the selected time
+    user_id = call.from_user.id
+    chat_id = call.message.chat.id
+    
+    # Validate and process the selected time
+    if selected_time in [slot.strftime('%H:%M') for slot in available_time_slots.get(user_id, {}).get('slots', [])]:
+        # Process the reservation as above
+        # ...
+        bot.send_message(chat_id, f"Reservation successful for {selected_time}")
+    else:
+        bot.send_message(chat_id, "Invalid or unavailable reservation time. Please select a valid time from the available slots.")
 
 
 # Polling loop to keep the bot running with none_stop=True
