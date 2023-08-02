@@ -326,6 +326,7 @@ def process_time_selection(message):
     available_time_slots[user_id]['slots'] = [slot for slot in available_time_slots[user_id]['slots'] if slot.strftime('%H:%M') != selected_time]
     available_time_slots[user_id]['slots'] = [slot for slot in available_time_slots[user_id]['slots'] if slot.astimezone(tz) > datetime.datetime.now(tz)]  # Remove past slots
 
+
 @bot.callback_query_handler(func=lambda call: True)
 def callback_handler(call):
     selected_time = call.data  # Assuming that the callback data is the selected time
