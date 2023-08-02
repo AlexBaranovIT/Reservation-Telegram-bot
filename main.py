@@ -5,7 +5,7 @@ import sqlite3
 import threading
 import os
 from keepalive import keep_alive
-import pytz  # Import the pytz library
+import pytz 
 
 # Replace 'YOUR_TELEGRAM_BOT_TOKEN' with the token you obtained from BotFather
 bot = telebot.TeleBot(os.getenv('tg_key'))
@@ -19,13 +19,13 @@ local_storage = threading.local()
 
 available_time_slots = {}
 
+
 def get_db_connection():
     # Check if a connection exists for the current thread, if not, create a new one
     if not hasattr(local_storage, 'db'):
         local_storage.db = sqlite3.connect('tennis_court_reservations.db')
         create_reservations_table()  # Ensure the table is created
     return local_storage.db
-
 
 
 def create_reservations_table():
