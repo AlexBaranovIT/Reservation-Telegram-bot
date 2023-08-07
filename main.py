@@ -56,6 +56,7 @@ def delete_reservation_from_db(user_id):
     get_db_connection().commit()
 
 
+#Generates inline buttons for user, to select date
 def generate_date_selection_buttons():
     # Get the current date and time
     current_time = datetime.datetime.now()
