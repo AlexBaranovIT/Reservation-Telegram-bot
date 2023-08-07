@@ -74,6 +74,7 @@ def generate_date_selection_buttons():
     return markup
 
 
+#Generates available time, based on database info
 def generate_available_time_slots(date):
     # Set the timezone for Cyprus
     tz = pytz.timezone('Europe/Nicosia')
