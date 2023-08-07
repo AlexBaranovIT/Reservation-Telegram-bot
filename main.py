@@ -21,6 +21,7 @@ local_storage = threading.local()
 available_time_slots = {}
 
 
+#Gets database connection
 def get_db_connection():
     # Check if a connection exists for the current thread, if not, create a new one
     if not hasattr(local_storage, 'db'):
