@@ -29,6 +29,7 @@ def get_db_connection():
     return local_storage.db
 
 
+#Makes new reservation table
 def create_reservations_table():
     db_connection = get_db_connection()
     cursor = db_connection.cursor()
