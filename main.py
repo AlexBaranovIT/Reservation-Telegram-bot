@@ -30,7 +30,7 @@ def get_db_connection():
     return local_storage.db
 
 
-#Makes new reservation table
+#Makes a new reservation table
 def create_reservations_table():
     db_connection = get_db_connection()
     cursor = db_connection.cursor()
@@ -43,6 +43,7 @@ def create_reservations_table():
     db_connection.commit()
 
 
+#Saves reservation to the  database
 def save_reservation_to_db(user_id, reservation_time):
     cursor = get_db_connection().cursor()
     cursor.execute("INSERT INTO reservations (user_id, reservation_time) VALUES (?, ?)", (user_id, reservation_time))
