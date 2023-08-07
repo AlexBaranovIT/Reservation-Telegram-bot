@@ -255,6 +255,7 @@ def cancel(message):
         bot.send_message(chat_id, "You don't have any reservation to cancel.")
       
 
+#Function to process date selection
 @bot.callback_query_handler(func=lambda call: True)
 def process_date_selection(call):
     chat_id = call.message.chat.id
