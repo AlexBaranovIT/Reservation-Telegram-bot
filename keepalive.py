@@ -7,7 +7,7 @@ app = Flask(__name__)
 #Function returns 'ALive' while running the program
 @app.route('/')
 def index():
-    return "Alive"
+    return "Server is Alive"
 
 
 def run():
