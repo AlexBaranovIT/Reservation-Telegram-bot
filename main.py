@@ -9,7 +9,6 @@ from keepalive import keep_alive
 import pytz 
 import datetime
 from PIL import Image, ImageDraw, ImageFont
-from datetime import datetime, timedelta
 
 # Replace 'YOUR_TELEGRAM_BOT_TOKEN' with the token you obtained from BotFather
 bot = telebot.TeleBot(os.getenv('tg_key'))
