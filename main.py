@@ -414,8 +414,6 @@ def callback_handler(call):
     
     # Validate and process the selected time
     if selected_time in [slot.strftime('%H:%M') for slot in available_time_slots.get(user_id, {}).get('slots', [])]:
-        # Process the reservation as above
-        # ...
         bot.send_message(chat_id, f"Reservation successful for {selected_time}")
     else:
         bot.send_message(chat_id, "Invalid or unavailable reservation time. Please select a valid time from the available slots.")
