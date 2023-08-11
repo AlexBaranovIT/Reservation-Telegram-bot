@@ -406,21 +406,6 @@ def process_time_selection(message):
         available_time_slots[user_id]['slots'] = [slot for slot in available_time_slots[user_id]['slots'] if slot.astimezone(tz) > dt.now(tz)]  # Remove past slots
 
 
-@bot.callback_query_handler(func=lambda call: True)
-def callback_handler(call):
-    selected_time = call.data  # Assuming that the callback data is the selected time
-    user_id = call.from_user.id
-    chat_id = call.message.chat.id
-    
-    # Validate and process the selected time
-    if selected_time in [slot.strftime('%H:%M') for slot in available_time_slots.get(user_id, {}).get('slots', [])]:
-        # Process the reservation as above
-        # ...
-        bot.send_message(chat_id, f"Reservation successful for {selected_time}")
-    else:
-        bot.send_message(chat_id, "Invalid or unavailable reservation time. Please select a valid time from the available slots.")
-
-
 # Polling loop to keep the bot running with none_stop=True
 bot.polling(none_stop=True)
 
