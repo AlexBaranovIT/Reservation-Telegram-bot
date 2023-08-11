@@ -17,6 +17,7 @@ bot = telebot.TeleBot(os.getenv('tg_key'))
 tz = pytz.timezone('Asia/Nicosia')
 
 keep_alive()
+
 # Create thread-local storage for SQLite connection
 local_storage = threading.local()
 
