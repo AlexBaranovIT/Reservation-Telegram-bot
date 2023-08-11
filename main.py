@@ -23,13 +23,6 @@ local_storage = threading.local()
 available_time_slots = {}
 
 
-def vacuum_database():
-    db_connection = get_db_connection()
-    cursor = db_connection.cursor()
-    cursor.execute("VACUUM;")
-    db_connection.close()
-
-
 def get_db_connection():
     # Check if a connection exists for the current thread, if not, create a new one
     if not hasattr(local_storage, 'db'):
