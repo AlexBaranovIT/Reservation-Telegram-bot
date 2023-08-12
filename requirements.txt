@@ -1,0 +1,2 @@
+pip install telebot
+pip install sqlite3
