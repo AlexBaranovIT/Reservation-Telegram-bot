@@ -239,20 +239,6 @@ def send_welcome(message):
     bot.send_message(message.chat.id, "Choose the function:", reply_markup=start_markup)
 
 
-@bot.message_handler(content_types=['text'])
-def handle_text(message):
-    start_markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
-    start_button = types.KeyboardButton('/start')
-    reserve_button = types.KeyboardButton('/reserve')
-    cancel_button = types.KeyboardButton('/cancel')
-    support_button = types.KeyboardButton('/support')
-    location_button = types.KeyboardButton('/location')
-
-    start_markup.add(start_button, reserve_button, cancel_button, support_button, location_button)
-    text_answer_message = "Choose command to continue: "
-    bot.send_message(message.chat.id, text_answer_message, reply_markup=start_markup)
-
-
 @bot.message_handler(commands=['support'])
 def on_start_command(message):
     # Send a message with the inline keyboard
@@ -419,6 +405,20 @@ def process_time_selection(message):
         # Remove the selected time from available slots for the user
         available_time_slots[user_id]['slots'] = [slot for slot in available_time_slots[user_id]['slots'] if slot.strftime('%H:%M') != selected_time]
         available_time_slots[user_id]['slots'] = [slot for slot in available_time_slots[user_id]['slots'] if slot.astimezone(tz) > dt.now(tz)]  # Remove past slots
+
+
+@bot.message_handler(content_types=['text'])
+def handle_text(message):
+    start_markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
+    start_button = types.KeyboardButton('/start')
+    reserve_button = types.KeyboardButton('/reserve')
+    cancel_button = types.KeyboardButton('/cancel')
+    support_button = types.KeyboardButton('/support')
+    location_button = types.KeyboardButton('/location')
+
+    start_markup.add(start_button, reserve_button, cancel_button, support_button, location_button)
+    text_answer_message = "Choose command to continue: "
+    bot.send_message(message.chat.id, text_answer_message, reply_markup=start_markup)
 
 
 # Polling loop to keep the bot running with none_stop=True
