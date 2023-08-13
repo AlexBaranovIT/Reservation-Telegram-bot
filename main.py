@@ -22,7 +22,7 @@ keep_alive()
 # Create thread-local storage for SQLite connection
 local_storage = threading.local()
 
-
+#Stores all user's reservations
 available_time_slots = {}
 
 
