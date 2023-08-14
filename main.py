@@ -157,7 +157,8 @@ def send_confirmation(chat_id, reservation_datetime, message, user_info):
     draw = ImageDraw.Draw(image)
 
     # Select font and size (you might need to specify the path to a font file)
-    font = ImageFont.load_default()
+    font_path = "arial.ttf"  # Path to your font file
+    font = ImageFont.truetype(font_path, size=20)
 
     # Draw the text onto the image
     draw.text((10, 10), reservation_details, fill="black", font=font)
