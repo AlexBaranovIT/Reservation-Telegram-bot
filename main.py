@@ -11,7 +11,7 @@ from PIL import Image, ImageDraw, ImageFont
  
 # Replace 'YOUR_TELEGRAM_BOT_TOKEN' with the token you obtained from BotFather
 bot = TeleBot(os.getenv('tg_key'))
-
+ 
 # Set the timezone to Limassol, Cyprus (GMT+3)
 tz = pytz.timezone('Asia/Nicosia')
 
