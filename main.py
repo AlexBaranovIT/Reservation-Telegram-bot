@@ -421,7 +421,7 @@ def handle_text(message):
     start_markup.add(start_button, reserve_button, cancel_button, support_button, location_button)
     text_answer_message = "Choose command to continue: "
     bot.send_message(message.chat.id, text_answer_message, reply_markup=start_markup)
-
+ 
 
 # Polling loop to keep the bot running with none_stop=True
 bot.polling(none_stop=True)
