@@ -152,7 +152,6 @@ def send_confirmation(chat_id, reservation_datetime, message, user_info):
         f"Date: {reservation_datetime.strftime('%Y-%m-%d')}\n"
         f"Time: {reservation_datetime.strftime('%H:%M')}"
     )
- 
     # Create an image to hold the text
     image = Image.new('RGB', (300, 150), color='white')
     draw = ImageDraw.Draw(image)
