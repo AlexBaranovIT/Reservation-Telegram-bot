@@ -1,2 +1,2 @@
 telebot == 0.0.5
-pip install sqlite3
+sqlite3 ==  3.43.0
