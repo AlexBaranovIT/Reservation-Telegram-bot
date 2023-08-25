@@ -3,7 +3,6 @@ from threading import Thread
 
 app = Flask(__name__)
 
-
 #Function returns 'ALive' while running the program
 @app.route('/')
 def index():
