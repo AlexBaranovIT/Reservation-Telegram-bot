@@ -3,7 +3,7 @@ from threading import Thread
 
 app = Flask(__name__)
 
-#Function returns 'ALive' while running the program
+#Function returns 'Server is ALive' while running the program
 @app.route('/')
 def index():
     return "Server is Alive"
