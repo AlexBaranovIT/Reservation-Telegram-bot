@@ -44,7 +44,7 @@ def create_reservations_table():
         );
     ''')
     db_connection.commit()
-
+ 
 
 def save_reservation_to_db(user_id, reservation_time):
     cursor = get_db_connection().cursor()
