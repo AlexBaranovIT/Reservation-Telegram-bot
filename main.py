@@ -324,7 +324,7 @@ def cancel(message):
         generate_available_time_slots(reservation_date)
 
         bot.send_message(chat_id, "Your reservation has been canceled.")
-        new_reservation = (user_id, reservation_time)
+        new_reservation = (user_id, reservation_time[0] + ", canceled")
         save_reservation_to_file(new_reservation, 'reservations.txt')
     else:
         bot.send_message(chat_id, "You don't have any reservation to cancel.")
