@@ -23,7 +23,7 @@ keep_alive()
 local_storage = threading.local()
 
 #Stores all user's reservations
-available_time_slots = {} 
+available_time_slots = {}
 
 
 def get_db_connection():
