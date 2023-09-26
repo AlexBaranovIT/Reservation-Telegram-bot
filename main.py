@@ -175,7 +175,7 @@ def send_confirmation(chat_id, reservation_datetime, message, user_info):
     os.remove(image_path)
     new_reservation = (user_id, reservation_datetime)
     # Get all the user's reservations and save them to the file
-    save_reservation_to_file(new_reservation, 'reservations.txt')
+    save_reservation_to_file(new_reservation, 'reservations.txt') 
 
     start_markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
     start_button = types.KeyboardButton('/start')
