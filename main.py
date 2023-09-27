@@ -46,7 +46,7 @@ def create_reservations_table():
     db_connection.commit()
  
 
-def save_reservation_to_db(user_id, reservation_time):
+def save_reservation_to_db(user_id, reservation_time): 
     cursor = get_db_connection().cursor()
     cursor.execute("INSERT INTO reservations (user_id, reservation_time) VALUES (?, ?)", (user_id, reservation_time))
     get_db_connection().commit()
