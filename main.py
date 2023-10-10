@@ -1,4 +1,3 @@
-import telebot
 from telebot import TeleBot, types
 from datetime import datetime as dt
 import sqlite3 
