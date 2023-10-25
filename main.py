@@ -13,7 +13,7 @@ from PIL import Image, ImageDraw, ImageFont
 bot = TeleBot(os.getenv('tg_key'))
 
 # Set the timezone to Nicosia, Cyprus (GMT+3)
-tz = pytz.timezone('Asia/Nicosia')
+tz = pytz.timezone('Asia/Nicosia') 
  
 #Call keep_alive function to connect to the flask server
 keep_alive()
