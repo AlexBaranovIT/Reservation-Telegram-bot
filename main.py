@@ -4,8 +4,8 @@ import sqlite3
 from datetime import time
 import threading
 import os
-from keepalive import keep_alive  
-import pytz 
+from keepalive import keep_alive
+import pytz
 import datetime
 from PIL import Image, ImageDraw, ImageFont 
    
