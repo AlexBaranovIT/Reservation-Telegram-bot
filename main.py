@@ -168,7 +168,7 @@ def send_confirmation(chat_id, reservation_datetime, message, user_info):
 
     # Send the image to the user
     with open(image_path, 'rb') as photo:
-        bot.send_photo(chat_id, photo, caption="You have successfully reserved the tennis court!")
+        bot.send_photo(chat_id, photo, caption="Congratulations! You have successfully reserved the tennis court!")
 
     # Remove the temporary image file
     os.remove(image_path)
